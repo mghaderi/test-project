@@ -3,7 +3,9 @@
 namespace Tests\Unit;
 
 use App\Events\AchievementUnlocked;
+use App\Models\Achievement;
 use App\Models\Comment;
+use App\Models\Enums\AchievementTypeEnum;
 use App\Models\Lesson;
 use App\Models\User;
 use App\Models\UserAchievement;
@@ -89,10 +91,78 @@ class AchievementServiceTest extends TestCase
         Event::fake();
         $achievementService = new AchievementService();
         $user = User::factory()->create();
-        $comments = Comment::factory()->count(7)->create(['user_id' => $user->id]);
+        Comment::factory()->count(7)->create(['user_id' => $user->id]);
         $achievementService->addToUserAchievementsWithComment($user);
         $userAchievementCount = UserAchievement::where('user_id', $user->id)->count();
         $this->assertTrue($userAchievementCount == 3);
         Event::assertDispatched(AchievementUnlocked::class, 3);
+    }
+
+    public function test_check_user_achievements_with_lesson_method_with_no_achievement_changed()
+    {
+        $achievementService = new AchievementService();
+        $user = User::factory()->create();
+        $lessons = Lesson::factory()->count(12)->create();
+        foreach ($lessons as $lesson) {
+            DB::table('lesson_user')->insert([
+                'user_id' => $user->id,
+                'lesson_id' => $lesson->id,
+                'watched' => true,
+            ]);
+        }
+        $achievementService->addToUserAchievementsWithLesson($user);
+        $userAchievementCount = UserAchievement::where('user_id', $user->id)->count();
+        $this->assertTrue($userAchievementCount == 3);
+        $achievementService->checkUserAchievementsWithLesson($user);
+        $userAchievementCount = UserAchievement::where('user_id', $user->id)->count();
+        $this->assertTrue($userAchievementCount == 3);
+    }
+
+    public function test_check_user_achievements_with_lesson_method_with_achievement_changed()
+    {
+        $achievementService = new AchievementService();
+        $user = User::factory()->create();
+        $lessons = Lesson::factory()->count(12)->create();
+        foreach ($lessons as $lesson) {
+            DB::table('lesson_user')->insert([
+                'user_id' => $user->id,
+                'lesson_id' => $lesson->id,
+                'watched' => true,
+            ]);
+        }
+        $achievementService->addToUserAchievementsWithLesson($user);
+        $userAchievementCount = UserAchievement::where('user_id', $user->id)->count();
+        $this->assertTrue($userAchievementCount == 3);
+        Achievement::where('name', '10 Lesson Watched')->update(['minimum_amount' => 15]);
+        $achievementService->checkUserAchievementsWithLesson($user);
+        $userAchievementCount = UserAchievement::where('user_id', $user->id)->count();
+        $this->assertTrue($userAchievementCount == 2);
+    }
+
+    public function test_check_user_achievements_with_comment_method_with_no_achievement_changed()
+    {
+        $achievementService = new AchievementService();
+        $user = User::factory()->create();
+        Comment::factory()->count(7)->create(['user_id' => $user->id]);
+        $achievementService->addToUserAchievementsWithComment($user);
+        $userAchievementCount = UserAchievement::where('user_id', $user->id)->count();
+        $this->assertTrue($userAchievementCount == 3);
+        $achievementService->checkUserAchievementsWithComment($user);
+        $userAchievementCount = UserAchievement::where('user_id', $user->id)->count();
+        $this->assertTrue($userAchievementCount == 3);
+    }
+
+    public function test_check_user_achievements_with_comment_method_with_achievement_changed()
+    {
+        $achievementService = new AchievementService();
+        $user = User::factory()->create();
+        Comment::factory()->count(7)->create(['user_id' => $user->id]);
+        $achievementService->addToUserAchievementsWithComment($user);
+        $userAchievementCount = UserAchievement::where('user_id', $user->id)->count();
+        $this->assertTrue($userAchievementCount == 3);
+        Achievement::where('name', '5 Comment Written')->update(['minimum_amount' => 8]);
+        $achievementService->checkUserAchievementsWithComment($user);
+        $userAchievementCount = UserAchievement::where('user_id', $user->id)->count();
+        $this->assertTrue($userAchievementCount == 2);
     }
 }

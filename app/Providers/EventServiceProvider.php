@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Events\AchievementUnlocked;
 use App\Events\CommentWritten;
 use App\Events\LessonWatched;
 use App\Listeners\UpdateUserAchievementWithComment;
 use App\Listeners\UpdateUserAchievementWithLesson;
+use App\Listeners\UpdateUserBadge;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -27,6 +29,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         CommentWritten::class => [
             UpdateUserAchievementWithComment::class,
+        ],
+        AchievementUnlocked::class => [
+            UpdateUserBadge::class,
         ],
     ];
 

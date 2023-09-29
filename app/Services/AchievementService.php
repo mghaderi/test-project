@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\AchievementUnlocked;
 use App\Models\Achievement;
 use App\Models\Comment;
 use App\Models\Enums\AchievementTypeEnum;
@@ -19,7 +20,6 @@ class AchievementService
         $numberOfUserLessons = DB::table('lesson_user')
             ->where('user_id', $user->id)
             ->where('watched', true)
-            ->groupBy('lesson_id')
             ->count();
         $newAchievements = Achievement::whereNotIn('id', $achievementIdsOfUser)
             ->where('type', AchievementTypeEnum::Lesson)
@@ -30,6 +30,7 @@ class AchievementService
                 'user_id' => $user->id,
                 'achievement_id' => $achievement->id,
             ]);
+            AchievementUnlocked::dispatch($achievement->name, $user);
         }
     }
 
@@ -48,6 +49,7 @@ class AchievementService
                 'user_id' => $user->id,
                 'achievement_id' => $achievement->id,
             ]);
+            AchievementUnlocked::dispatch($achievement->name, $user);
         }
     }
 

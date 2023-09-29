@@ -61,7 +61,6 @@ class AchievementService
         $numberOfUserLessons = DB::table('lesson_user')
             ->where('user_id', $user->id)
             ->where('watched', true)
-            ->groupBy('lesson_id')
             ->count();
         $wrongAchievements = Achievement::whereIn('id', $achievementIdsOfUser)
             ->where('type', AchievementTypeEnum::Lesson)

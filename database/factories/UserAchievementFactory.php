@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\UserAchievement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class UserAtchievementFactory extends Factory
+class UserAchievementFactory extends Factory
 {
     protected $model = UserAchievement::class;
 

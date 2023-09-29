@@ -4,12 +4,12 @@ namespace Database\Factories;
 
 use App\Models\Achievement;
 use App\Models\User;
-use App\Models\Comment;
+use App\Models\UserAchievement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class CommentFactory extends Factory
+class UserAtchievementFactory extends Factory
 {
-    protected $model = Comment::class;
+    protected $model = UserAchievement::class;
 
     public function definition()
     {

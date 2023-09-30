@@ -66,4 +66,25 @@ class BadgeServiceTest extends TestCase
         $userBadgeCount = UserBadge::where('user_id', $user->id)->count();
         $this->assertTrue($userBadgeCount == 2);
     }
+
+    public function test_user_badge_report_method()
+    {
+        $badgeService = new BadgeService();
+        $user = User::factory()->create();
+        $report = $badgeService->userBadgeReport($user);
+        $this->assertTrue($report == [
+            "current_badge_name" => "Beginner",
+            "next_badge_name" => "Intermediate",
+            "remaining_for_next_badge" => 4
+        ]);
+        UserAchievement::factory()->count(5)->create(['user_id' => $user->id]);
+        $badgeService->addToUserBadges($user);
+        $report = $badgeService->userBadgeReport($user);
+        $this->assertTrue($report == [
+            "current_badge_name" => "Intermediate",
+            "next_badge_name" => "Advanced",
+            "remaining_for_next_badge" => 3,
+
+        ]);
+    }
 }

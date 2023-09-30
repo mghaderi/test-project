@@ -12,6 +12,34 @@ use Illuminate\Support\Facades\DB;
 
 class AchievementService
 {
+    public function userAchievementReport(User $user): array
+    {
+        $unlockedAchievements = Achievement::select('achievements.*')
+            ->join('user_achievements', 'achievements.id', '=', 'user_achievements.achievement_id')
+            ->where('user_achievements.user_id', $user->id)
+            ->get();
+        $unlockedAchievements = $unlockedAchievements
+            ->merge(
+                Achievement::where('minimum_amount', 0)->get()
+            );
+        $nextAchievements = Achievement
+            ::whereNotIn('id', $unlockedAchievements->pluck('achievements.id')->all())
+            ->get()
+            ->groupBy('type');
+        $nextAvailableAchievements = collect([]);
+        foreach ($nextAchievements as $type => $achievements) {
+            $nextAvailableAchievements = $nextAvailableAchievements->concat(
+                $achievements->where('minimum_amount', $achievements->min('minimum_amount'))
+            );
+        }
+        return [
+            'unlocked_achievement_names' =>
+                $unlockedAchievements->pluck('achievements.name')->unique()->all(),
+            'next_available_achievement_names' =>
+                $nextAvailableAchievements->pluck('name')->all()
+        ];
+    }
+
     public function addToUserAchievementsWithLesson(User $user): void
     {
         $achievementIdsOfUser = UserAchievement::where('user_id', $user->id)

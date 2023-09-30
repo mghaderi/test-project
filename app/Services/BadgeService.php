@@ -31,7 +31,7 @@ class BadgeService
             ->orderBy('minimum_achievement_amount')
             ->first();
         $userAchievementsCount = UserAchievement::where('user_id', $user->id)->count();
-        $remaining = $nextBadge->minimum_achievement_amount ?? 0 - $userAchievementsCount;
+        $remaining = ($nextBadge->minimum_achievement_amount ?? 0) - $userAchievementsCount;
         if ($remaining < 0) {
             $remaining = 0;
         }

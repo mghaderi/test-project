@@ -5,7 +5,6 @@ namespace Tests\Unit;
 use App\Events\AchievementUnlocked;
 use App\Models\Achievement;
 use App\Models\Comment;
-use App\Models\Enums\AchievementTypeEnum;
 use App\Models\Lesson;
 use App\Models\User;
 use App\Models\UserAchievement;
@@ -164,5 +163,29 @@ class AchievementServiceTest extends TestCase
         $achievementService->checkUserAchievementsWithComment($user);
         $userAchievementCount = UserAchievement::where('user_id', $user->id)->count();
         $this->assertTrue($userAchievementCount == 2);
+    }
+
+    public function test_user_achievement_report_method()
+    {
+        $achievementService = new AchievementService();
+        $user = User::factory()->create();
+        $report = $achievementService->userAchievementReport($user);
+        $this->assertTrue($report['unlocked_achievement_names'] == []);
+        $this->assertTrue($report['next_available_achievement_names'] == [
+            'First Lesson Watched',
+            'First Comment Written'
+        ]);
+        Comment::factory()->count(7)->create(['user_id' => $user->id]);
+        $achievementService->addToUserAchievementsWithComment($user);
+        $report = $achievementService->userAchievementReport($user);
+        $this->assertTrue($report['unlocked_achievement_names'] == [
+            'First Comment Written',
+            '3 Comment Written',
+            '5 Comment Written',
+        ]);
+        $this->assertTrue($report['next_available_achievement_names'] == [
+            'First Lesson Watched',
+            '10 Comment Written'
+        ]);
     }
 }

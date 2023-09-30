@@ -23,7 +23,7 @@ class AchievementService
                 Achievement::where('minimum_amount', 0)->get()
             );
         $nextAchievements = Achievement
-            ::whereNotIn('id', $unlockedAchievements->pluck('achievements.id')->all())
+            ::whereNotIn('id', $unlockedAchievements->pluck('id')->all())
             ->get()
             ->groupBy('type');
         $nextAvailableAchievements = collect([]);
@@ -34,7 +34,7 @@ class AchievementService
         }
         return [
             'unlocked_achievement_names' =>
-                $unlockedAchievements->pluck('achievements.name')->unique()->all(),
+                $unlockedAchievements->pluck('name')->unique()->all(),
             'next_available_achievement_names' =>
                 $nextAvailableAchievements->pluck('name')->all()
         ];

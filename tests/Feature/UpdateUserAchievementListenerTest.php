@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Feature;
 
 use App\Events\AchievementUnlocked;
 use App\Events\CommentWritten;
